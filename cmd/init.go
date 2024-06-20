@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/dterbah/gopm/core/config"
 	"github.com/dterbah/gopm/core/engine"
@@ -24,6 +25,11 @@ var initCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var config *config.GoPMConfig = config.NewGoPMConfig()
 		config.ProjectName = input.ReadUserInput("Name of your Go project :", DEFAULT_PROJECT_NAME)
+		if _, err := os.Stat(config.ProjectName); err == nil {
+			logrus.Errorf("Project %s already exists !", config.ProjectName)
+			return
+		}
+
 		// verify if there is a directory with the project name already existing
 		config.Version = input.ReadUserInput("version :", DEFAULT_PROJECT_VERSION)
 		config.Description = input.ReadUserInput("description :", DEFAULT_PROJECT_DESCRIPTION)
