@@ -1,3 +1,4 @@
 a.out
 coverage*
 .DS_Store
+gopm.json
