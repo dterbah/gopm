@@ -12,6 +12,7 @@ type GoPMConfig struct {
 	License     string            `json:"license"`     // Licence of the project
 	Scripts     map[string]string `json:"scripts"`     // Map of scripts that can be used
 	ProjectName string            `json:"name"`        // Name of the project
+	Git         string            `json:"name"`        // Git repository name
 }
 
 /*

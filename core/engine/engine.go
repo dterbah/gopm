@@ -4,20 +4,112 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/dterbah/gopm/core/config"
+	"github.com/dterbah/gopm/core/license"
 )
 
 /*
 Name of the gopm file used by the CLI
 */
 const GOPM_CONFIG_FILE = "gopm.json"
+const LICENSE_FILE = "LICENSE.txt"
+
+const DEFAULT_ENTRY_POINT_CONTENT = `
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Hello world !")
+}
+`
 
 /*
 Init a project with given user information
 */
 func InitProject(config config.GoPMConfig) error {
-	return exportConfig(config)
+	/*
+		init steps : create the directory associated to the project name,
+		then create the gopm.json, entry point, fetch licence ?
+		execute go mod init
+	*/
+
+	err := createProjectDirectory(config.ProjectName)
+	if err != nil {
+		return err
+	}
+
+	err = exportConfig(config)
+	if err != nil {
+		return err
+	}
+
+	err = createEntryPoint(config.EntryPoint, config.ProjectName)
+	if err != nil {
+		return err
+	}
+
+	licenseContent, err := license.FetchLicense(config.License)
+	if err != nil {
+		return err
+	}
+
+	err = exportLicense(config.ProjectName, licenseContent)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ---- Private functions ---- //
+
+/*
+Create the project directory
+*/
+func createProjectDirectory(dirName string) error {
+	return os.Mkdir(dirName, os.ModePerm)
+}
+
+func createEntryPoint(entryPoint string, toDir string) error {
+	entryPointPath := filepath.Join(toDir, entryPoint)
+
+	file, err := os.OpenFile(entryPointPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return errors.New("error when creating entry point")
+	}
+
+	_, err = file.WriteString(DEFAULT_ENTRY_POINT_CONTENT)
+	if err != nil {
+		return errors.New("erorr when writing the entry point")
+	}
+
+	err = file.Close()
+
+	return err
+}
+
+/*
+Export the license in a file
+*/
+func exportLicense(projectName, licenseContent string) error {
+	licensePath := filepath.Join(projectName, LICENSE_FILE)
+	file, err := os.OpenFile(licensePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return errors.New("license file failed")
+	}
+
+	defer file.Close()
+
+	_, err = file.Write([]byte(licenseContent))
+	if err != nil {
+		return errors.New("writing license file")
+	}
+
+	return nil
 }
 
 /*
@@ -29,8 +121,9 @@ func exportConfig(config config.GoPMConfig) error {
 		return errors.New("config to json failed")
 	}
 
-	// Écrire le JSON dans un fichier
-	file, err := os.Create(GOPM_CONFIG_FILE)
+	configPath := filepath.Join(config.ProjectName, GOPM_CONFIG_FILE)
+
+	file, err := os.OpenFile(configPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return errors.New("gopm config file failed")
 	}
