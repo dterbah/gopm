@@ -24,6 +24,7 @@ var initCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var config *config.GoPMConfig = config.NewGoPMConfig()
 		config.ProjectName = input.ReadUserInput("Name of your Go project :", DEFAULT_PROJECT_NAME)
+		// verify if there is a directory with the project name already existing
 		config.Version = input.ReadUserInput("version :", DEFAULT_PROJECT_VERSION)
 		config.Description = input.ReadUserInput("description :", DEFAULT_PROJECT_DESCRIPTION)
 		config.EntryPoint = input.ReadUserInput("entry point :", DEFAULT_PROJECT_ENTRY_POINT)

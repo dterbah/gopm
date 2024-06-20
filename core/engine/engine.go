@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/dterbah/gopm/core/config"
@@ -62,6 +63,11 @@ func InitProject(config config.GoPMConfig) error {
 		return err
 	}
 
+	err = initGoProject(config.ProjectName, config.Git)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -110,6 +116,13 @@ func exportLicense(projectName, licenseContent string) error {
 	}
 
 	return nil
+}
+
+func initGoProject(projectDir string, repositoryName string) error {
+	dir, _ := os.Getwd()
+	cmd := exec.Command("go", "mod", "init", repositoryName)
+	cmd.Dir = filepath.Join(dir, projectDir)
+	return cmd.Run()
 }
 
 /*
