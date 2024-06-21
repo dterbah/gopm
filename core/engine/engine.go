@@ -32,6 +32,11 @@ func main() {
 Init a project with given user information
 */
 func InitProject(config config.GoPMConfig) error {
+	// setup the basic scripts in the configurations
+	config.Scripts["build"] = "go build"
+	config.Scripts["run"] = "go run " + config.EntryPoint
+	config.Scripts["test"] = "go test ./..."
+
 	/*
 		init steps : create the directory associated with the project name,
 		then create the gopm.json, entry point, fetch license,
