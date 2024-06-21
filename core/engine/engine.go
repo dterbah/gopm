@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,40 +33,31 @@ Init a project with given user information
 */
 func InitProject(config config.GoPMConfig) error {
 	/*
-		init steps : create the directory associated to the project name,
-		then create the gopm.json, entry point, fetch licence ?
-		execute go mod init
+		init steps : create the directory associated with the project name,
+		then create the gopm.json, entry point, fetch license,
+		and execute go mod init
 	*/
-
-	err := createProjectDirectory(config.ProjectName)
-	if err != nil {
-		return err
+	steps := []struct {
+		name string
+		fn   func() error
+	}{
+		{"create project directory", func() error { return createProjectDirectory(config.ProjectName) }},
+		{"export config", func() error { return exportConfig(config) }},
+		{"create entry point", func() error { return createEntryPoint(config.EntryPoint, config.ProjectName) }},
+		{"fetch and export license", func() error {
+			licenseContent, err := license.FetchLicense(config.License)
+			if err != nil {
+				return err
+			}
+			return exportLicense(config.ProjectName, licenseContent)
+		}},
+		{"initialize Go project", func() error { return initGoProject(config.ProjectName, config.Git) }},
 	}
 
-	err = exportConfig(config)
-	if err != nil {
-		return err
-	}
-
-	err = createEntryPoint(config.EntryPoint, config.ProjectName)
-	if err != nil {
-		return err
-	}
-
-	licenseContent, err := license.FetchLicense(config.License)
-	if err != nil {
-		return err
-	}
-
-	err = exportLicense(config.ProjectName, licenseContent)
-
-	if err != nil {
-		return err
-	}
-
-	err = initGoProject(config.ProjectName, config.Git)
-	if err != nil {
-		return err
+	for _, step := range steps {
+		if err := step.fn(); err != nil {
+			return fmt.Errorf("failed to %s: %w", step.name, err)
+		}
 	}
 
 	return nil
