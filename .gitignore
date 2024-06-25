@@ -3,3 +3,4 @@ coverage*
 .DS_Store
 gopm.json
 gopm
+go-project

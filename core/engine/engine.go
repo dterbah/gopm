@@ -7,9 +7,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/dterbah/gopm/core/config"
 	"github.com/dterbah/gopm/core/license"
+	"github.com/dterbah/gopm/utils/file"
+	"github.com/sirupsen/logrus"
 )
 
 /*
@@ -47,7 +50,7 @@ func InitProject(config config.GoPMConfig) error {
 		fn   func() error
 	}{
 		{"create project directory", func() error { return createProjectDirectory(config.ProjectName) }},
-		{"export config", func() error { return exportConfig(config) }},
+		{"export config", func() error { return exportConfig(config, filepath.Join(config.ProjectName, GOPM_CONFIG_FILE)) }},
 		{"create entry point", func() error { return createEntryPoint(config.EntryPoint, config.ProjectName) }},
 		{"fetch and export license", func() error {
 			licenseContent, err := license.FetchLicense(config.License)
@@ -66,6 +69,42 @@ func InitProject(config config.GoPMConfig) error {
 	}
 
 	return nil
+}
+
+/*
+* Add dependencies for the current golang project
+ */
+func AddDependencies(dependencies []string) error {
+	config, err := config.ReadConfig(GOPM_CONFIG_FILE)
+
+	if err != nil {
+		return err
+	}
+
+	// Add dependencies to the current config, and write it in
+	// the gopm.json
+	for _, dependency := range dependencies {
+		// find version of installed lib
+		version := "latest"
+		parts := strings.Split(dependency, "@")
+		if len(parts) == 2 {
+			version = parts[1]
+		}
+
+		logrus.Infof("⏳ Instaling dependency %s ...", dependency)
+		cmd := exec.Command("go", "get", dependency)
+		// todo: error case
+		err := cmd.Run()
+
+		if err != nil {
+			return err
+		}
+
+		config.Dependencies[dependency] = version
+		logrus.Infof("✅ Dependency %s installed !", dependency)
+	}
+
+	return exportConfig(*config, GOPM_CONFIG_FILE)
 }
 
 // ---- Private functions ---- //
@@ -125,15 +164,18 @@ func initGoProject(projectDir string, repositoryName string) error {
 /*
 Export the configuration in a file
 */
-func exportConfig(config config.GoPMConfig) error {
+func exportConfig(config config.GoPMConfig, configPath string) error {
 	configJSON, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return errors.New("config to json failed")
 	}
 
-	configPath := filepath.Join(config.ProjectName, GOPM_CONFIG_FILE)
+	flags := os.O_WRONLY | os.O_CREATE
+	if !file.IsExists(configPath) {
+		flags = flags | os.O_APPEND
+	}
 
-	file, err := os.OpenFile(configPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(configPath, flags, 0644)
 	if err != nil {
 		return errors.New("gopm config file failed")
 	}
