@@ -9,10 +9,10 @@ import (
 var installCmd = &cobra.Command{
 	Use:   "install [packages]",
 	Short: "Install packages",
-	Long:  "Insstall specific packages for your Go project",
-	Args:  cobra.MinimumNArgs(1),
+	Long:  "Install specific packages for your Go project",
+	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		err := engine.AddDependencies(args)
+		err := engine.InstallDependencies(args)
 		if err != nil {
 			logrus.Errorf("Error when installing dependencies [%s]", err)
 		} else {
@@ -24,8 +24,8 @@ var installCmd = &cobra.Command{
 var iCmd = &cobra.Command{
 	Use:   "i [packages]",
 	Short: "Install packages",
-	Long:  "Insstall specific packages for your Go project",
-	Args:  cobra.MinimumNArgs(1),
+	Long:  "Install specific packages for your Go project",
+	Args:  cobra.MinimumNArgs(0),
 	Run:   installCmd.Run,
 }
 

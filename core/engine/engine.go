@@ -72,42 +72,67 @@ func InitProject(config config.GoPMConfig) error {
 }
 
 /*
-* Add dependencies for the current golang project
- */
-func AddDependencies(dependencies []string) error {
+* Install dependencies for the current golang project. If the dependencies arg is empty, this
+function will try ot install all the existing dependencies in the gopm.json
+*/
+func InstallDependencies(dependencies []string) error {
 	config, err := config.ReadConfig(GOPM_CONFIG_FILE)
 
 	if err != nil {
 		return err
 	}
 
-	// Add dependencies to the current config, and write it in
-	// the gopm.json
-	for _, dependency := range dependencies {
-		// find version of installed lib
-		version := "latest"
-		parts := strings.Split(dependency, "@")
-		if len(parts) == 2 {
-			version = parts[1]
+	if len(dependencies) == 0 {
+		for dependency, version := range config.Dependencies {
+			formattedDependency := fmt.Sprintf("%s@%s", dependency, version)
+			err := installDependency(formattedDependency)
+			if err != nil {
+				return err
+			}
 		}
 
-		logrus.Infof("⏳ Instaling dependency %s ...", dependency)
-		cmd := exec.Command("go", "get", dependency)
-		// todo: error case
-		err := cmd.Run()
+		return nil
+	} else {
+		// Add dependencies to the current config, and write it in
+		// the gopm.json
+		for _, dependency := range dependencies {
+			// find version of installed lib
+			version := "latest"
+			parts := strings.Split(dependency, "@")
+			if len(parts) == 2 {
+				version = parts[1]
+			}
 
-		if err != nil {
-			return err
+			err := installDependency(dependency)
+			if err != nil {
+				return err
+			}
+
+			config.Dependencies[parts[0]] = version
 		}
-
-		config.Dependencies[dependency] = version
-		logrus.Infof("✅ Dependency %s installed !", dependency)
 	}
 
 	return exportConfig(*config, GOPM_CONFIG_FILE)
 }
 
 // ---- Private functions ---- //
+
+/*
+Install specific dependency in the project
+*/
+func installDependency(dependency string) error {
+	logrus.Infof("⏳ Instaling dependency %s ...", dependency)
+	cmd := exec.Command("go", "get", dependency)
+	// todo: error case
+	err := cmd.Run()
+
+	if err != nil {
+		return err
+	}
+
+	logrus.Infof("✅ Dependency %s installed !", dependency)
+	return nil
+}
 
 /*
 Create the project directory
