@@ -30,6 +30,8 @@ func InitProject(config core.GoPMConfig) error {
 	config.Scripts["build"] = "go build"
 	config.Scripts["run"] = "go run " + config.EntryPoint
 	config.Scripts["test"] = "go test ./..."
+	config.Scripts["fmt"] = "go fmt ./..."
+
 	/*
 		init steps : create the directory associated with the project name,
 		then create the gopm.json, entry point, fetch license,

@@ -22,8 +22,9 @@ func RunScript(command string) error {
 	if err != nil {
 		return err
 	}
-
-	logrus.Infof("%s", output)
+	if len(output) > 0 {
+		logrus.Infof("%s", output)
+	}
 
 	return nil
 }

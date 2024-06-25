@@ -17,6 +17,8 @@ var runCmd = &cobra.Command{
 
 		if err != nil {
 			logrus.Errorf("Error when launching the command %s --> %s", script, err)
+		} else {
+			logrus.Info("✅ Command executed with success")
 		}
 	},
 }
