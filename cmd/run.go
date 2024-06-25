@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/dterbah/gopm/core/engine"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -10,8 +12,12 @@ var runCmd = &cobra.Command{
 	Long:  "Run a script present in your gopm.json",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		//script := args[0]
+		script := args[0]
+		err := engine.RunScript(script)
 
+		if err != nil {
+			logrus.Errorf("Error when launching the command %s --> %s", script, err)
+		}
 	},
 }
 

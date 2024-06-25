@@ -9,6 +9,7 @@ import (
 
 	"github.com/dterbah/gopm/core"
 	"github.com/dterbah/gopm/core/engine/dependency"
+	runner "github.com/dterbah/gopm/core/engine/script-runner"
 )
 
 const DEFAULT_ENTRY_POINT_CONTENT = `
@@ -68,6 +69,22 @@ function will try ot install all the existing dependencies in the gopm.json
 */
 func InstallDependencies(dependencies []string) error {
 	return dependency.Install(dependencies)
+}
+
+func RunScript(scriptName string) error {
+	config, err := core.ReadConfig()
+
+	if err != nil {
+		return err
+	}
+
+	// check if command exists
+	scriptCommand, ok := config.Scripts[scriptName]
+	if !ok {
+		return fmt.Errorf("script %s not found", scriptName)
+	}
+
+	return runner.RunScript(scriptCommand)
 }
 
 // ---- Private functions ---- //
