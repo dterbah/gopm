@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/dterbah/gopm/core"
-	"github.com/dterbah/gopm/core/dependency"
+	"github.com/dterbah/gopm/core/engine/dependency"
 )
 
 const DEFAULT_ENTRY_POINT_CONTENT = `
