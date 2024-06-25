@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dterbah/gopm/core/config"
+	"github.com/dterbah/gopm/core"
 	"github.com/dterbah/gopm/core/engine"
 	"github.com/dterbah/gopm/utils/input"
 	"github.com/dterbah/gopm/utils/user"
@@ -23,7 +23,7 @@ var initCommand = &cobra.Command{
 	Short: "Initialize a new project",
 	Long:  "Initialize a new project with basic information",
 	Run: func(cmd *cobra.Command, args []string) {
-		var config *config.GoPMConfig = config.NewGoPMConfig()
+		var config *core.GoPMConfig = core.NewGoPMConfig()
 		config.ProjectName = input.ReadUserInput("Name of your Go project :", DEFAULT_PROJECT_NAME)
 		// verify if there is a directory with the project name already existing
 		if _, err := os.Stat(config.ProjectName); err == nil {

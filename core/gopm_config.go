@@ -1,4 +1,4 @@
-package config
+package core
 
 import (
 	"encoding/json"
@@ -6,8 +6,14 @@ import (
 	"io"
 	"os"
 
+	"github.com/dterbah/gopm/utils/file"
 	"github.com/sirupsen/logrus"
 )
+
+/*
+Name of the gopm file used by the CLI
+*/
+const GOPM_CONFIG_FILE = "gopm.json"
 
 /*
 Defines the content of the gopm.json. This config will be used
@@ -38,9 +44,9 @@ func NewGoPMConfig() *GoPMConfig {
 /*
 Read the gopm configuration from a file
 */
-func ReadConfig(path string) (*GoPMConfig, error) {
+func ReadConfig() (*GoPMConfig, error) {
 	config := NewGoPMConfig()
-	configFile, err := os.Open(path)
+	configFile, err := os.Open(GOPM_CONFIG_FILE)
 
 	if err != nil {
 		return nil, errors.New("error when opening the configuration file")
@@ -60,4 +66,33 @@ func ReadConfig(path string) (*GoPMConfig, error) {
 	}
 
 	return config, nil
+}
+
+/*
+Export the configuration in a file
+*/
+func ExportConfig(config GoPMConfig, configPath string) error {
+	configJSON, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		return errors.New("config to json failed")
+	}
+
+	flags := os.O_WRONLY | os.O_CREATE
+	if !file.IsExists(configPath) {
+		flags = flags | os.O_APPEND
+	}
+
+	file, err := os.OpenFile(configPath, flags, 0644)
+	if err != nil {
+		return errors.New("gopm config file failed")
+	}
+
+	defer file.Close()
+
+	_, err = file.Write(configJSON)
+	if err != nil {
+		return errors.New("writing gopm config file")
+	}
+
+	return nil
 }

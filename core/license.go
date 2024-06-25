@@ -1,12 +1,16 @@
-package license
+package core
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
 const GITHUB_LICENSE_BASE_URL = "https://api.github.com/licenses"
+const LICENSE_FILE = "LICENSE.txt"
 
 /*
 Response JSON from the Github API for retrieving licence templates
@@ -39,4 +43,24 @@ func FetchLicense(name string) (string, error) {
 	}
 
 	return license.Body, nil
+}
+
+/*
+Export the license in a file
+*/
+func ExportLicense(projectName, licenseContent string) error {
+	licensePath := filepath.Join(projectName, LICENSE_FILE)
+	file, err := os.OpenFile(licensePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return errors.New("license file failed")
+	}
+
+	defer file.Close()
+
+	_, err = file.Write([]byte(licenseContent))
+	if err != nil {
+		return errors.New("writing license file")
+	}
+
+	return nil
 }

@@ -1,25 +1,15 @@
 package engine
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
-	"github.com/dterbah/gopm/core/config"
-	"github.com/dterbah/gopm/core/license"
-	"github.com/dterbah/gopm/utils/file"
-	"github.com/sirupsen/logrus"
+	"github.com/dterbah/gopm/core"
+	"github.com/dterbah/gopm/core/dependency"
 )
-
-/*
-Name of the gopm file used by the CLI
-*/
-const GOPM_CONFIG_FILE = "gopm.json"
-const LICENSE_FILE = "LICENSE.txt"
 
 const DEFAULT_ENTRY_POINT_CONTENT = `
 package main
@@ -34,12 +24,11 @@ func main() {
 /*
 Init a project with given user information
 */
-func InitProject(config config.GoPMConfig) error {
+func InitProject(config core.GoPMConfig) error {
 	// setup the basic scripts in the configurations
 	config.Scripts["build"] = "go build"
 	config.Scripts["run"] = "go run " + config.EntryPoint
 	config.Scripts["test"] = "go test ./..."
-
 	/*
 		init steps : create the directory associated with the project name,
 		then create the gopm.json, entry point, fetch license,
@@ -50,14 +39,16 @@ func InitProject(config config.GoPMConfig) error {
 		fn   func() error
 	}{
 		{"create project directory", func() error { return createProjectDirectory(config.ProjectName) }},
-		{"export config", func() error { return exportConfig(config, filepath.Join(config.ProjectName, GOPM_CONFIG_FILE)) }},
+		{"export config", func() error {
+			return core.ExportConfig(config, filepath.Join(config.ProjectName, core.GOPM_CONFIG_FILE))
+		}},
 		{"create entry point", func() error { return createEntryPoint(config.EntryPoint, config.ProjectName) }},
 		{"fetch and export license", func() error {
-			licenseContent, err := license.FetchLicense(config.License)
+			licenseContent, err := core.FetchLicense(config.License)
 			if err != nil {
 				return err
 			}
-			return exportLicense(config.ProjectName, licenseContent)
+			return core.ExportLicense(config.ProjectName, licenseContent)
 		}},
 		{"initialize Go project", func() error { return initGoProject(config.ProjectName, config.Git) }},
 	}
@@ -76,63 +67,10 @@ func InitProject(config config.GoPMConfig) error {
 function will try ot install all the existing dependencies in the gopm.json
 */
 func InstallDependencies(dependencies []string) error {
-	config, err := config.ReadConfig(GOPM_CONFIG_FILE)
-
-	if err != nil {
-		return err
-	}
-
-	if len(dependencies) == 0 {
-		for dependency, version := range config.Dependencies {
-			formattedDependency := fmt.Sprintf("%s@%s", dependency, version)
-			err := installDependency(formattedDependency)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	} else {
-		// Add dependencies to the current config, and write it in
-		// the gopm.json
-		for _, dependency := range dependencies {
-			// find version of installed lib
-			version := "latest"
-			parts := strings.Split(dependency, "@")
-			if len(parts) == 2 {
-				version = parts[1]
-			}
-
-			err := installDependency(dependency)
-			if err != nil {
-				return err
-			}
-
-			config.Dependencies[parts[0]] = version
-		}
-	}
-
-	return exportConfig(*config, GOPM_CONFIG_FILE)
+	return dependency.Install(dependencies)
 }
 
 // ---- Private functions ---- //
-
-/*
-Install specific dependency in the project
-*/
-func installDependency(dependency string) error {
-	logrus.Infof("⏳ Instaling dependency %s ...", dependency)
-	cmd := exec.Command("go", "get", dependency)
-	// todo: error case
-	err := cmd.Run()
-
-	if err != nil {
-		return err
-	}
-
-	logrus.Infof("✅ Dependency %s installed !", dependency)
-	return nil
-}
 
 /*
 Create the project directory
@@ -159,58 +97,9 @@ func createEntryPoint(entryPoint string, toDir string) error {
 	return err
 }
 
-/*
-Export the license in a file
-*/
-func exportLicense(projectName, licenseContent string) error {
-	licensePath := filepath.Join(projectName, LICENSE_FILE)
-	file, err := os.OpenFile(licensePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return errors.New("license file failed")
-	}
-
-	defer file.Close()
-
-	_, err = file.Write([]byte(licenseContent))
-	if err != nil {
-		return errors.New("writing license file")
-	}
-
-	return nil
-}
-
 func initGoProject(projectDir string, repositoryName string) error {
 	dir, _ := os.Getwd()
 	cmd := exec.Command("go", "mod", "init", repositoryName)
 	cmd.Dir = filepath.Join(dir, projectDir)
 	return cmd.Run()
-}
-
-/*
-Export the configuration in a file
-*/
-func exportConfig(config config.GoPMConfig, configPath string) error {
-	configJSON, err := json.MarshalIndent(config, "", "  ")
-	if err != nil {
-		return errors.New("config to json failed")
-	}
-
-	flags := os.O_WRONLY | os.O_CREATE
-	if !file.IsExists(configPath) {
-		flags = flags | os.O_APPEND
-	}
-
-	file, err := os.OpenFile(configPath, flags, 0644)
-	if err != nil {
-		return errors.New("gopm config file failed")
-	}
-
-	defer file.Close()
-
-	_, err = file.Write(configJSON)
-	if err != nil {
-		return errors.New("writing gopm config file")
-	}
-
-	return nil
 }
