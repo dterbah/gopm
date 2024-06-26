@@ -23,7 +23,7 @@ func TestFetchLicense(t *testing.T) {
 		isError        bool
 	}{
 		{"test fetch license with no existing license name", "bad-license", true, true},
-		{"test fetch license with existing license name", "GPL-3.0", false, false},
+		{"test fetch license with existing license name", "MIT", false, false},
 	}
 
 	for _, test := range tests {

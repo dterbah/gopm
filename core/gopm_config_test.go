@@ -104,5 +104,15 @@ func TestReadConfig(t *testing.T) {
 }
 
 func TestExportConfig(t *testing.T) {
-	// todo implement
+	defer cleanupConfigTest()
+	assert := assert.New(t)
+
+	config := NewGoPMConfig()
+	config.Author = "toto"
+
+	err := ExportConfig(*config, GOPM_CONFIG_FILE)
+	assert.Nil(err)
+
+	config, _ = ReadConfig()
+	assert.Equal("toto", config.Author)
 }
