@@ -21,7 +21,12 @@ func Error(format string, args ...interface{}) {
 }
 
 func Info(format string, args ...interface{}) {
-	logrus.Infof(formateMessage(Blue, format), args)
+	message := formateMessage(Blue, format)
+	if len(args) == 0 {
+		logrus.Info(message)
+	} else {
+		logrus.Infof(formateMessage(Blue, format), args)
+	}
 }
 
 /*

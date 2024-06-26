@@ -31,6 +31,8 @@ func InitProject(config core.GoPMConfig) error {
 	config.Scripts["run"] = "go run " + config.EntryPoint
 	config.Scripts["test"] = "go test ./..."
 	config.Scripts["fmt"] = "go fmt ./..."
+	config.Scripts["tidy"] = "go mod tidy"
+	config.Scripts["clean"] = "go clean"
 
 	/*
 		init steps : create the directory associated with the project name,
@@ -58,6 +60,7 @@ func InitProject(config core.GoPMConfig) error {
 
 	for _, step := range steps {
 		if err := step.fn(); err != nil {
+			os.RemoveAll(config.ProjectName)
 			return fmt.Errorf("failed to %s: %w", step.name, err)
 		}
 	}
@@ -95,10 +98,16 @@ func RunScript(scriptName string) error {
 Create the project directory
 */
 func createProjectDirectory(dirName string) error {
+	if len(dirName) == 0 {
+		return errors.New("dir name empty")
+	}
 	return os.Mkdir(dirName, os.ModePerm)
 }
 
 func createEntryPoint(entryPoint string, toDir string) error {
+	if len(entryPoint) == 0 {
+		return errors.New("empty entry point")
+	}
 	entryPointPath := filepath.Join(toDir, entryPoint)
 
 	file, err := os.OpenFile(entryPointPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
