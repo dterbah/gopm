@@ -1,9 +1,8 @@
 ## Go Project Manager (AKA gopm)
 
-<img src="./assets/logo.webp" width="150" />
-
 This CLI is a NPM like for your golang projects. It provides basic commands to manage your dependencies, start scripts or create golang projects from scratch.
 Feel free to give me ideas for improvement !
+<img src="./assets/logo.webp" width="200" />
 
 ![CI](https://github.com/dterbah/gopm/actions/workflows/go-test.yml/badge.svg)
 [![codecov](https://codecov.io/gh/dterbah/gopm/branch/main/graph/badge.svg)](https://codecov.io/gh/dterbah/gopm)
@@ -31,16 +30,16 @@ To create a new project, you can use this command :
 gopm init
 ```
 
-You can type the different information asking by the CLI.
+You can type the different information asking by the CLI. You could see default values for each information between parenthesis.
 This command will create a new folder with these information :
 
-```bash
-#<your-project-name>
-   # - LICENCE.txt --> This file contains the LICENCE information of your project
-   # gopm.json --> JSON file used to manage your project
-   # go.mod
-   # go.sum
-   # <your-entry-file>.go --> Entry point of your project
+```
+<your-project-name>/
+├── LICENSE.txt # This file contains the LICENSE information of your project
+├── gopm.json # JSON file used to manage your project
+├── go.mod # Module file for Go dependencies
+├── go.sum # Checksum file for Go dependencies
+└── <your-entry-file>.go # Entry point of your project
 ```
 
 #### Install new dependency
@@ -64,4 +63,4 @@ gopm i
 
 #### Use custom commands
 
-If you want to use custom commands with this CLI, you can add these directly in the `gopm.json` file in the `script` section. When a project is created, few default commands are directly created.
+If you want to use custom commands with this CLI, you can add these directly in the `gopm.json` file in the `scripts` section. When a project is created, few default commands are directly created.
