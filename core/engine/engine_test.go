@@ -50,7 +50,33 @@ func TestInitProject(t *testing.T) {
 }
 
 func TestInstallDependencies(t *testing.T) {
-	// todo implement
+	defer cleanup()
+	assert := assert.New(t)
+	dependencies := []string{"github.com/dterbah/gods", "github.com/sirupsen/logrus@v1.9.3"}
+	config := core.NewGoPMConfig()
+	config.ProjectName = PROJECT_NAME
+	config.EntryPoint = ENTRY_POINT
+	config.License = LICENSE_NAME
+	config.Git = GIT
+
+	// test without file config
+	err := InstallDependencies(dependencies)
+	assert.NotNil(err)
+
+	InitProject(*config)
+	os.Chdir(config.ProjectName)
+
+	// test with invalid dependencies
+	err = InstallDependencies([]string{"dummy-dependency"})
+	assert.NotNil(err)
+
+	// test with valid dependencies
+	err = InstallDependencies(dependencies)
+	assert.Nil(err)
+
+	// test without dependencies
+
+	os.Chdir("..")
 }
 
 func TestRunScript(t *testing.T) {
