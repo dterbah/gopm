@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func cleanup() {
+func cleanupLicenseTest() {
 	os.Remove("LICENSE.txt")
 }
 
@@ -45,7 +45,7 @@ func TestFetchLicense(t *testing.T) {
 }
 
 func TestExportLicense(t *testing.T) {
-	defer cleanup()
+	defer cleanupLicenseTest()
 	// todo implement
 	assert := assert.New(t)
 
