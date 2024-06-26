@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/dterbah/gopm/core"
-	"github.com/sirupsen/logrus"
+	logger "github.com/dterbah/gopm/log"
 )
 
 /*
@@ -59,7 +59,7 @@ func Install(dependencies []string) error {
 Install specific dependency in the project
 */
 func installDependency(dependency string) error {
-	logrus.Infof("⏳ Instaling dependency %s ...", dependency)
+	logger.Info("⏳ Instaling dependency %s ...", dependency)
 	cmd := exec.Command("go", "get", dependency)
 	// todo: error case
 	err := cmd.Run()
@@ -68,6 +68,6 @@ func installDependency(dependency string) error {
 		return err
 	}
 
-	logrus.Infof("✅ Dependency %s installed !", dependency)
+	logger.Info("✅ Dependency %s installed !", dependency)
 	return nil
 }

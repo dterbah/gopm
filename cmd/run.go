@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/dterbah/gopm/core/engine"
-	"github.com/sirupsen/logrus"
+	logger "github.com/dterbah/gopm/log"
 	"github.com/spf13/cobra"
 )
 
@@ -16,9 +16,9 @@ var runCmd = &cobra.Command{
 		err := engine.RunScript(script)
 
 		if err != nil {
-			logrus.Errorf("Error when launching the command %s --> %s", script, err)
+			logger.Error("Error when launching the command %s --> %s", script, err)
 		} else {
-			logrus.Info("✅ Command executed with success")
+			logger.Info("✅ Command executed with success")
 		}
 	},
 }

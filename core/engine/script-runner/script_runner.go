@@ -4,7 +4,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	logger "github.com/dterbah/gopm/log"
 )
 
 /*
@@ -23,7 +23,7 @@ func RunScript(command string) error {
 		return err
 	}
 	if len(output) > 0 {
-		logrus.Infof("%s", output)
+		logger.Info("%s", output)
 	}
 
 	return nil

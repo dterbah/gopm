@@ -6,9 +6,9 @@ import (
 
 	"github.com/dterbah/gopm/core"
 	"github.com/dterbah/gopm/core/engine"
+	logger "github.com/dterbah/gopm/log"
 	"github.com/dterbah/gopm/utils/input"
 	"github.com/dterbah/gopm/utils/user"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ var initCommand = &cobra.Command{
 		config.ProjectName = input.ReadUserInput("Name of your Go project :", DEFAULT_PROJECT_NAME)
 		// verify if there is a directory with the project name already existing
 		if _, err := os.Stat(config.ProjectName); err == nil {
-			logrus.Errorf("Project %s already exists !", config.ProjectName)
+			logger.Error("Project %s already exists !", config.ProjectName)
 			return
 		}
 
@@ -41,9 +41,9 @@ var initCommand = &cobra.Command{
 		err := engine.InitProject(*config)
 
 		if err != nil {
-			logrus.Errorf("Error when creating the project %s --> %s", config.ProjectName, err)
+			logger.Error("Error when creating the project %s --> %s", config.ProjectName, err)
 		} else {
-			logrus.Infof("Project '%s' created with success !", config.ProjectName)
+			logger.Info("Project '%s' created with success !", config.ProjectName)
 		}
 	},
 }

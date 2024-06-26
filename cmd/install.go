@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/dterbah/gopm/core/engine"
-	"github.com/sirupsen/logrus"
+	logger "github.com/dterbah/gopm/log"
 	"github.com/spf13/cobra"
 )
 
@@ -14,9 +14,9 @@ var installCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := engine.InstallDependencies(args)
 		if err != nil {
-			logrus.Errorf("Error when installing dependencies [%s]", err)
+			logger.Error("Error when installing dependencies [%s]", err)
 		} else {
-			logrus.Infof("⌛️ %d dependecies added to your project", len(args))
+			logger.Info("⌛️ %d dependecies added to your project", len(args))
 		}
 	},
 }

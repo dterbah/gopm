@@ -1,6 +1,9 @@
 ## Go Project Manager (AKA gopm)
 
-This CLI take into account all the management of your golang projects.
+<img src="./assets/logo.webp" width="150" />
+
+This CLI is a NPM like for your golang projects. It provides basic commands to manage your dependencies, start scripts or create golang projects from scratch.
+Feel free to give me ideas for improvement !
 
 ![CI](https://github.com/dterbah/gopm/actions/workflows/go-test.yml/badge.svg)
 [![codecov](https://codecov.io/gh/dterbah/gopm/branch/main/graph/badge.svg)](https://codecov.io/gh/dterbah/gopm)
