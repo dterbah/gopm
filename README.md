@@ -61,6 +61,12 @@ gopm install
 gopm i
 ```
 
+#### Show current version of CLI
+
+```bash
+gopm -v
+```
+
 #### Use custom commands
 
 If you want to use custom commands with this CLI, you can add these directly in the `gopm.json` file in the `scripts` section. When a project is created, few default commands are directly created.
