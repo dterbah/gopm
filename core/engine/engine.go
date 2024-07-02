@@ -28,7 +28,7 @@ Init a project with given user information
 func InitProject(config core.GoPMConfig) error {
 	// setup the basic scripts in the configurations
 	config.Scripts["build"] = "go build"
-	config.Scripts["run"] = "go run " + config.EntryPoint
+	config.Scripts["main"] = "go run " + config.EntryPoint
 	config.Scripts["test"] = "go test ./..."
 	config.Scripts["fmt"] = "go fmt ./..."
 	config.Scripts["tidy"] = "go mod tidy"

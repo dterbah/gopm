@@ -16,7 +16,7 @@ var runCmd = &cobra.Command{
 		err := engine.RunScript(script)
 
 		if err != nil {
-			logger.Error("Error when launching the command %s --> %s", script, err)
+			logger.Error("%s", err)
 		} else {
 			logger.Info("✅ Command executed with success")
 		}
