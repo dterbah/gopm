@@ -17,7 +17,7 @@ Feel free to give me ideas for improvement !
 To install this tool, you can use the following command :
 
 ```bash
-go install github.com/dterbah/gopm
+go install github.com/dterbah/gopm@latest
 ```
 
 ### List of available commands
